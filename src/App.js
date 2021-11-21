@@ -25,6 +25,74 @@ function App() {
 
 
 
+  useEffect(() => {
+    const checkIfWalletIsConnected = async (youknowaccounts) => {
+      try {
+        setLoading(true);
+  
+        const { ethereum } = window;
+  
+        if (!ethereum) {
+          console.log("Make sure you have metamask!");
+          return;
+        } else {
+          console.log("We have the ethereum object", ethereum);
+        }
+        const accounts = await ethereum.request({ method: "eth_accounts" });
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          console.log("Found an authorized account:", account);
+          setCurrentAccount(account);
+          getDetails(youknowaccounts);
+        } else {
+          console.log("No authorized account found");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      setLoading(false);
+    };
+  
+    
+    const getDetails = async (accounts) => {
+      try {
+        const { ethereum } = window;
+        if (ethereum) {
+  
+          const provider = new ethers.providers.Web3Provider(ethereum);
+          const signer = provider.getSigner();
+          const wavePortalContract = new ethers.Contract(MemeTokenSaleAddress, MemeTokenSaleABI, signer);
+          
+          const priceOfToken = await wavePortalContract.tokenPrice();
+          const priceOfTokenToNumber = ethers.utils.formatEther(priceOfToken);
+          setTokenPrice(priceOfTokenToNumber);
+          
+          
+          const amountOfTokenSold = await wavePortalContract.tokensSold();
+          const getAmountOfTokenSold = await amountOfTokenSold.toNumber()
+          setTokenSold(getAmountOfTokenSold);
+          
+          const SendMemeContract = new ethers.Contract(MemeTokenAddress, MemeTokenABI, signer);
+          if(currentAccount !== "") {
+            const balanceofToken = await SendMemeContract.balanceOf(accounts);
+            const getbalanceofToken = await balanceofToken.toNumber();
+            setBalanceOFAccount(getbalanceofToken);
+            console.log(getbalanceofToken);
+          }
+           
+          
+        } else {
+          console.log("Ethereum object doesn't exist!")
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  
+ 
+  
+    checkIfWalletIsConnected(currentAccount);
+  }, [currentAccount, MemeTokenSaleABI, MemeTokenABI]);
   const connectWallet = async () => {
     try {
       const { ethereum } = window;
@@ -44,41 +112,6 @@ function App() {
       console.log(error);
     }
   };
-
-  const getDetails = async (accounts) => {
-    try {
-      const { ethereum } = window;
-      if (ethereum) {
-
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const wavePortalContract = new ethers.Contract(MemeTokenSaleAddress, MemeTokenSaleABI, signer);
-        
-        const priceOfToken = await wavePortalContract.tokenPrice();
-        const priceOfTokenToNumber = ethers.utils.formatEther(priceOfToken);
-        setTokenPrice(priceOfTokenToNumber);
-        
-        
-        const amountOfTokenSold = await wavePortalContract.tokensSold();
-        const getAmountOfTokenSold = await amountOfTokenSold.toNumber()
-        setTokenSold(getAmountOfTokenSold);
-        
-        const SendMemeContract = new ethers.Contract(MemeTokenAddress, MemeTokenABI, signer);
-        if(currentAccount !== "") {
-          const balanceofToken = await SendMemeContract.balanceOf(accounts);
-          const getbalanceofToken = await balanceofToken.toNumber();
-          setBalanceOFAccount(getbalanceofToken);
-          console.log(getbalanceofToken);
-        }
-         
-        
-      } else {
-        console.log("Ethereum object doesn't exist!")
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   const buyToken = async (e) => {
     try {
@@ -101,37 +134,6 @@ function App() {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    
-  const checkIfWalletIsConnected = async (youknowaccounts) => {
-    try {
-      setLoading(true);
-
-      const { ethereum } = window;
-
-      if (!ethereum) {
-        console.log("Make sure you have metamask!");
-        return;
-      } else {
-        console.log("We have the ethereum object", ethereum);
-      }
-      const accounts = await ethereum.request({ method: "eth_accounts" });
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log("Found an authorized account:", account);
-        setCurrentAccount(account);
-        getDetails(youknowaccounts);
-      } else {
-        console.log("No authorized account found");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setLoading(false);
-  };
-    checkIfWalletIsConnected(currentAccount);
-  }, [currentAccount]);
 
   return (
     <div className="container" style={{ width: "650px" }}>
