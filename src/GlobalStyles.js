@@ -10,4 +10,16 @@ export const GlobalStyles = createGlobalStyle`
     * {
         margin: 0;
     }
+
+    .input{
+        width: 100%;
+        height: 50px;
+        max-width: var(--maxWidth);
+        margin: 10px auto;
+        input {
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+        }
+    }
 `

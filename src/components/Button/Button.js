@@ -2,10 +2,8 @@ import React from 'react';
 import { Container } from './Styles';
 
 
-const Button = () => {
-    const wave = () => {
-
-    }
+const Button = ({wave}) => {
+   
     return (
         <Container onClick={wave}>
             Click Me
